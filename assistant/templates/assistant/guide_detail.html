@@ -1,0 +1,73 @@
+{% extends 'assistant/base.html' %}
+
+{% block title %}{{ guide.title }} | Technical Guide{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'assistant:chat' %}">Chat Window</a>
+    <span>/</span>
+    <a href="{% url 'assistant:guide_list' %}">Tech Guides</a>
+    <span>/</span>
+    <span>{{ guide.title }}</span>
+</nav>
+
+<article class="guide-detail-card">
+    <div class="guide-detail-header">
+        <div>
+            <span class="category-chip">{{ guide.get_category_display }}</span>
+            <h1>{{ guide.title }}</h1>
+            <p class="guide-summary">{{ guide.summary }}</p>
+        </div>
+        <div class="guide-detail-actions">
+            <a href="{% url 'assistant:chat' %}" class="btn btn-outline">Return to Chat Window</a>
+            {% if guide.external_url %}
+                <a href="{{ guide.external_url }}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                    {{ guide.external_label|default:"Official Reference" }} &#8599;
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="steps-section">
+        <h2>Step-by-Step Instructions</h2>
+        <ol class="steps-list">
+            {% for step in guide.steps_json %}
+                <li class="step-item">
+                    <h3>{{ step.heading }}</h3>
+                    <p>{{ step.detail }}</p>
+                    {% if step.command %}
+                        <pre class="command-block"><code>{{ step.command }}</code></pre>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    {% if guide.sample_questions %}
+        <section class="guide-meta-section">
+            <h2>Related Questions You Can Ask the Chatbot</h2>
+            <ul class="sample-q-list">
+                {% for q in guide.sample_questions %}
+                    <li>{{ q }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+</article>
+
+{% if related_guides %}
+    <section class="section-block">
+        <h2>More in {{ guide.get_category_display }}</h2>
+        <div class="card-grid">
+            {% for rel in related_guides %}
+                <article class="guide-card">
+                    <span class="category-chip">{{ rel.get_category_display }}</span>
+                    <h3>{{ rel.title }}</h3>
+                    <p>{{ rel.summary|truncatewords:20 }}</p>
+                    <a href="{{ rel.get_absolute_url }}" class="card-link">Open Guide &rarr;</a>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

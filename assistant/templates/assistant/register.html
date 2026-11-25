@@ -1,0 +1,44 @@
+{% extends 'assistant/base.html' %}
+
+{% block title %}Register | Chatbot Assistant System{% endblock %}
+
+{% block content %}
+<section class="auth-wrapper">
+    <div class="auth-card auth-card-wide">
+        <p class="eyebrow">User Registration</p>
+        <h1>Create Your Account</h1>
+        <p class="muted">Register with your basic details to access the Chatbot Assistant and technical guides.</p>
+
+        <form method="post" novalidate class="stacked-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-grid-2">
+                {% for field in form %}
+                    <div class="form-group {% if field.name == 'address' %}span-2{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="help-text">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="field-error">{{ field.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Register Account</button>
+        </form>
+
+        <p class="auth-footer">
+            Already registered? <a href="{% url 'assistant:login' %}">Log in here</a>.
+        </p>
+    </div>
+</section>
+{% endblock %}

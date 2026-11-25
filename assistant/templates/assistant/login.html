@@ -1,0 +1,42 @@
+{% extends 'assistant/base.html' %}
+
+{% block title %}Login | Chatbot Assistant System{% endblock %}
+
+{% block content %}
+<section class="auth-wrapper">
+    <div class="auth-card">
+        <p class="eyebrow">User Authentication</p>
+        <h1>Login to Chatbot Assistant</h1>
+        <p class="muted">Sign in with your username and password to start chatting.</p>
+
+        <form method="post" novalidate class="stacked-form">
+            {% csrf_token %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <p class="auth-footer">
+            New user? <a href="{% url 'assistant:register' %}">Create an account</a>.
+        </p>
+    </div>
+</section>
+{% endblock %}

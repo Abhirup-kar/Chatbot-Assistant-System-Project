@@ -1,0 +1,109 @@
+{% extends 'assistant/base.html' %}
+{% load static %}
+
+{% block title %}Chat Window | Chatbot Assistant System{% endblock %}
+
+{% block content %}
+<section class="chat-layout">
+    <aside class="chat-sidebar">
+        <div class="sidebar-card">
+            <h2>Quick Topics</h2>
+            <p class="muted small">Click a question to ask the chatbot immediately:</p>
+            <div class="prompt-chips">
+                {% for prompt in quick_prompts %}
+                    <button type="button" class="prompt-chip" data-prompt="{{ prompt }}">{{ prompt }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">
+                <h2>Popular Guides</h2>
+                <a href="{% url 'assistant:guide_list' %}" class="small-link">All ({{ total_guides }})</a>
+            </div>
+            <ul class="sidebar-guide-list">
+                {% for guide in guides %}
+                    <li>
+                        <a href="{{ guide.get_absolute_url }}">{{ guide.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
+
+    <div class="chat-panel">
+        <div class="chat-header">
+            <div>
+                <h1>Technical Support Chat Window</h1>
+                <p class="muted small">Ask about technical issues or setups and click returned links to open guides.</p>
+            </div>
+            <button type="button" id="clear-chat-btn" class="btn btn-outline btn-sm" data-clear-url="{% url 'assistant:clear_chat_api' %}">
+                Clear Chat
+            </button>
+        </div>
+
+        <div id="chat-messages" class="chat-messages" aria-live="polite">
+            {% if not chat_messages %}
+                <div class="message-row bot-row" id="welcome-message">
+                    <div class="message-bubble bot-bubble">
+                        <div class="message-meta">Chatbot Assistant</div>
+                        <p class="message-text">
+                            Hi {{ user.first_name|default:user.username }}! Ask me how to solve a technical issue or set up tools like Python, Django, XAMPP/MySQL, Git, Wi-Fi, printers, or audio. I will answer and give you clickable links to the right guide.
+                        </p>
+                        <div class="message-links">
+                            <a href="{% url 'assistant:guide_list' %}" class="chat-link chat-link-internal">Browse All Technical Guides</a>
+                            <a href="{% url 'assistant:edit_profile' %}" class="chat-link chat-link-internal">Edit User Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% for msg in chat_messages %}
+                <div class="message-row {% if msg.sender == 'user' %}user-row{% else %}bot-row{% endif %}">
+                    <div class="message-bubble {% if msg.sender == 'user' %}user-bubble{% else %}bot-bubble{% endif %}">
+                        <div class="message-meta">
+                            {% if msg.sender == 'user' %}You{% else %}Chatbot Assistant{% endif %}
+                            <span>{{ msg.created_at|date:"H:i" }}</span>
+                        </div>
+                        <p class="message-text">{{ msg.message }}</p>
+                        {% if msg.links %}
+                            <div class="message-links">
+                                {% for link in msg.links %}
+                                    {% if link.type == 'external' %}
+                                        <a href="{{ link.url }}" class="chat-link chat-link-external" target="_blank" rel="noopener noreferrer">
+                                            {{ link.label }} &#8599;
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ link.url }}" class="chat-link chat-link-internal">
+                                            {{ link.label }} &rarr;
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form id="chat-form" class="chat-input-bar" data-api-url="{% url 'assistant:chat_api' %}">
+            {% csrf_token %}
+            <label for="chat-input" class="sr-only">Ask a technical question</label>
+            <input
+                type="text"
+                id="chat-input"
+                name="message"
+                class="chat-input"
+                placeholder="Ask a technical question (e.g., How do I set up Django or fix Wi-Fi?)"
+                autocomplete="off"
+                required
+            >
+            <button type="submit" id="chat-send-btn" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'assistant/js/chat.js' %}"></script>
+{% endblock %}

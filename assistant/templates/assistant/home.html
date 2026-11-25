@@ -1,0 +1,75 @@
+{% extends 'assistant/base.html' %}
+
+{% block title %}Home | Chatbot Assistant System{% endblock %}
+
+{% block content %}
+<section class="hero-card">
+    <div class="hero-copy">
+        <p class="eyebrow">Python &amp; Django Technical Helpdesk</p>
+        <h1>Instant Technical Support &amp; Setup Assistance</h1>
+        <p class="hero-lead">
+            Get immediate answers to software setup, configuration, and troubleshooting questions
+            with clickable step-by-step guide links that redirect straight to the exact solution page.
+        </p>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'assistant:chat' %}" class="btn btn-primary">Open Chat Window</a>
+                <a href="{% url 'assistant:guide_list' %}" class="btn btn-outline">Browse {{ guide_count }} Tech Guides</a>
+                <a href="{% url 'assistant:edit_profile' %}" class="btn btn-outline">Edit User Details</a>
+            {% else %}
+                <a href="{% url 'assistant:register' %}" class="btn btn-primary">Create Account</a>
+                <a href="{% url 'assistant:login' %}" class="btn btn-outline">Login to Chat</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="hero-modules">
+        <h2>User Module Features</h2>
+        <ul class="feature-list">
+            <li>
+                <strong>Register</strong>
+                <span>Create a personal account with basic contact and role details.</span>
+            </li>
+            <li>
+                <strong>Login</strong>
+                <span>Authenticate securely using your username and password.</span>
+            </li>
+            <li>
+                <strong>Chat Window</strong>
+                <span>Ask technical questions and click returned links to open setup guides.</span>
+            </li>
+            <li>
+                <strong>Edit User Details</strong>
+                <span>Update personal information, bio, and password anytime.</span>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="section-header">
+        <div>
+            <h2>Covered Technical Topics</h2>
+            <p class="muted">The chatbot includes {{ guide_count }} structured guides covering setups and troubleshooting.</p>
+        </div>
+        {% if user.is_authenticated %}
+            <a href="{% url 'assistant:guide_list' %}" class="btn btn-outline btn-sm">View All Guides</a>
+        {% endif %}
+    </div>
+
+    <div class="card-grid">
+        {% for guide in featured_guides %}
+            <article class="guide-card">
+                <span class="category-chip">{{ guide.get_category_display }}</span>
+                <h3>{{ guide.title }}</h3>
+                <p>{{ guide.summary|truncatewords:22 }}</p>
+                {% if user.is_authenticated %}
+                    <a href="{{ guide.get_absolute_url }}" class="card-link">Open Guide &rarr;</a>
+                {% else %}
+                    <a href="{% url 'assistant:login' %}" class="card-link">Login to view guide &rarr;</a>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
